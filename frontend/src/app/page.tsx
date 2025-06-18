@@ -8,7 +8,8 @@ export default function Home() {
   const [position, setPosition] = useState<[number, number]>([32.85, 39.92]);
 
   useEffect(() => {
-    const ws = new WebSocket('ws://localhost:8000/ws/track');
+    const url = process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8000/ws/track';
+    const ws = new WebSocket(url);
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
