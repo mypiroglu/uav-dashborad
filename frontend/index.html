@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>UAV Dashboard</title>
+<style>
+  #map {
+    position: relative;
+    width: 500px;
+    height: 500px;
+    border: 1px solid #333;
+    margin: 20px auto;
+    background: #f0f0f0;
+  }
+  #marker {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: red;
+    transform: translate(-50%, -50%);
+  }
+</style>
+</head>
+<body>
+<div id="map">
+  <div id="marker"></div>
+</div>
+<script>
+(function(){
+  const ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws/track');
+  const baseLat = 39.92;
+  const baseLon = 32.85;
+  const scale = 100000; // simple scale for demo
+  ws.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    const x = (data.lon - baseLon) * scale + 250;
+    const y = (baseLat - data.lat) * scale + 250;
+    const marker = document.getElementById('marker');
+    marker.style.left = x + 'px';
+    marker.style.top = y + 'px';
+  };
+})();
+</script>
+</body>
+</html>
