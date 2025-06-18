@@ -3,6 +3,21 @@ from fastapi.middleware.cors import CORSMiddleware
 import asyncio
 import random
 
+
+def drone_simulator():
+    """Yield simulated telemetry data."""
+    lat = 39.9200
+    lon = 32.8500
+    while True:
+        lat += random.uniform(0.00005, 0.0002)
+        lon += random.uniform(0.00005, 0.0002)
+        yield {
+            "lat": lat,
+            "lon": lon,
+            "battery": random.randint(60, 100),
+            "altitude": random.randint(90, 120),
+        }
+
 app = FastAPI()
 
 # CORS izinleri
@@ -24,23 +39,8 @@ def status():
 @app.websocket("/ws/track")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-
-    # Başlangıç koordinatları
-    lat = 39.9200
-    lon = 32.8500
-
+    simulator = drone_simulator()
     while True:
-        # Her seferinde küçük bir hareket
-        lat += random.uniform(0.00005, 0.0002)
-        lon += random.uniform(0.00005, 0.0002)
-
-        # Telemetri verisi
-        data = {
-            "lat": lat,
-            "lon": lon,
-            "battery": random.randint(70, 100),
-            "altitude": random.randint(95, 115)
-        }
-
+        data = next(simulator)
         await websocket.send_json(data)
         await asyncio.sleep(1)
